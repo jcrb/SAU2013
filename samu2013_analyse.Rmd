@@ -1,0 +1,111 @@
+Activité SAMU 2013
+========================================================
+Auteur: JcB ('r as.character(Sys.Date())')
+Date de création: 20132-08-04
+
+```{r init}
+as.character(Sys.Date())
+sessionInfo()
+```
+Introduction
+------------
+Les données brutes sont récupérées à partir du serveur régional Sagec et copiée collées dans le fichier */Stat Resural/SAU2013/samu2013.csv*. Contient les informations des SAMU 67 et 68.
+Les données sont:
+
+n°  |  intitulé  |  remarque  
+----|------------|-----------  
+[1] | date       | date du jour au format jj/mm/aaaa  
+[2] | service    | SAMU 67 ou SAMU 68  
+[3] | affaires   | nombre d'affaires traitées par le SAMU  
+[4] | primaires  | nombre d'interventions primaires  
+[5] | secondaires| nombre d'interventions secondaires  
+[6] | néonat     | nombre de transfert de néonatalogie  
+[7] | secondaires| nombre de transfert infirmier inter-hospitaliers  
+[8] | ASSU       | nombre de transport réalisés par une ASSU à la demande du SAMU  
+[9] | VSAV       | nombre de transport réalisés par le SDIS à la demande du SAMU  
+[10] | conseils  | nombre d'affaires réglées par un conseil médical de la régulation  
+[11] | Medecins  | nombre de médecins libéraux envoyés par le Centre 15  
+
+```{r read_data}
+file2<-"../SAU2013/samu2013.csv"
+samu<-read.csv(file2,header=T,sep=",")
+names(samu)
+str(samu)
+samu$date<-as.Date(samu$date,format="%j/%m/%Y")
+max(samu$date)
+```
+Période d'étude:
+```{r periode}
+range(samu$date)
+```
+Variables
+---------
+
+variable | commentaires 
+---------|-------------  
+samu67 | dataframe de toutes les lignes concernant le SAMU 67  
+samu68   | dataframe de toutes les lignes concernant le SAMU 68  
+aff_samu67 | nombre d'affaires SAMU 67  
+aff_samu68 | nombre d'affaires SAMU 68  
+
+
+```{r variables}
+samu67<-samu[samu$service=="SAMU 67",]
+samu68<-samu[samu$service=="SAMU 68",]
+```
+
+Librairies
+----------
+```{r lib}
+library("zoo")
+library("lubridate")
+```
+
+Constantes
+----------
+```{r constantes}
+pop.67.2010.municipale<-1095905
+pop.68.2010.municipale<-749782
+```
+
+Calculs
+-------
+#### nombre d'affaires:
+```{r affaires}
+aff_samu67<-sum(samu67$affaires)
+aff_samu68<-sum(samu68$affaires)
+aff_samu67
+mean(samu67$affaires)
+aff_samu68
+mean(samu68$affaires)
+
+tapply(samu$affaires,samu$service,summary)
+tapply(samu$primaire,samu$service,summary)
+tapply(samu$secondaire,samu$service,summary)
+tapply(samu$néonat,samu$service,summary)
+tapply(samu$TIIH,samu$service,summary)
+tapply(samu$ASSU,samu$service,summary)
+tapply(samu$VSAV,samu$service,summary)
+tapply(samu$conseils,samu$service,summary)
+tapply(samu$Medecin,samu$service,summary)
+```
+taux de recours
+---------------
+```{r recours}
+aff_samu67*2/pop.67.2010.municipale
+aff_samu68*2/pop.68.2010.municipale
+```
+
+Graphiques
+-----------
+#### activité en nb d'affaires
+```{r graphe affaires}
+z67<-zoo(samu67$affaires,samu67$date)
+z68<-zoo(samu68$affaires,samu68$date)
+
+plot(z68,ylim=c(200,1500),col="blue",xlab="",ylab="")
+lines(z67,ylim=c(200,1500),col="red")
+title(main="Affaires traitées par les SAMU",ylab="Nombre",xlab="Année 2013 - Activité quotidienne")
+legend("topright",legend=c("SAMU 67","SAMU 68"),col=c("red","blue"),lty=1,bty="n",cex=0.8)
+
+```

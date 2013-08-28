@@ -1,0 +1,287 @@
+Etude des SAU d'Alsace sur 50 jours
+========================================================
+
+L'étude porte du 1/1/2013 au 22/2/2013 avec un compatatif sur la même période en 2012.
+Les données sont extraite de SAGEC HUS et copiées/collées dans un tableur libre office. La dernière colonne (supprimer) est supprimées. La feuille est enregistrée sous *sau2013.csv*
+```{r}
+file<-"~/Documents/Resural/Stat Resural/SAU2013"
+setwd(file)
+timestamp()
+d<-read.csv("sau2013.csv",header=TRUE)
+```
+Préparation des données
+------------------------
+Transformation de la colonne *date* du format jj/mm/aaaa au format yyyy-mm-dd
+```{r}
+d$date<-as.Date(d$date,"%d/%m/%Y")
+```
+Renommage de la colonne *organisme* par la création d'une nouvelle colonne *hop*
+NB: on ignore le CMCO. Deux structures sont absentes de la base: Sta anne et Diaconnat-Fonderie
+```{r}
+d$hop[d$Organisme=="CCOM"]<-"HUS"
+d$hop[d$Organisme=="CH Altkirch"]<-"ALK"
+d$hop[d$Organisme=="CH de Colmar (CMC Le Parc)"]<-"COL"
+d$hop[d$Organisme=="CH de Colmar (Louis Pasteur)"]<-"COL"
+d$hop[d$Organisme=="CH de Guebwiller"]<-"GEB"
+d$hop[d$Organisme=="CH de Mulhouse ( Hasenrain)"]<-"MUL"
+d$hop[d$Organisme=="CH de Mulhouse (Emile Muller-Moenschberg"]<-"MUL"
+d$hop[d$Organisme=="CH de Saverne"]<-"SAV"
+d$hop[d$Organisme=="CH de Sélestat"]<-"SEL"
+d$hop[d$Organisme=="CH de Thann"]<-"TAN"
+d$hop[d$Organisme=="CH de Wissembourg"]<-"WIS"
+d$hop[d$Organisme=="CHU de Strasbourg (Hôp. Civil)"]<-"HUS"
+d$hop[d$Organisme=="CHU de Strasbourg(Hautepierre)"]<-"HUS"
+d$hop[d$Organisme=="Clinique des Diaconesses"]<-"DIA"
+d$hop[d$Organisme=="Clinique Ste Odile (Strasbourg"]<-"ODI"
+d$hop[d$Organisme=="Clinique des 3 Frontières"]<-"CTF"
+```
+Renommage de la colonne *service* par la création d'une nouvelle colonne *ser2*
+```{r}
+d$ser2[d$service=="CCOM Chirurgie"]<-"CCOM"
+d$ser2[d$service=="Upatou"]<-"sALK"
+d$ser2[d$service=="SAU Le Parc"]<-"pCOL"
+d$ser2[d$service=="SAU Pasteur"]<-"aCOL"
+d$ser2[d$service=="UHTCD"]<-"sGEB"
+d$ser2[d$service=="PEDIATRIE NEONATOLOGIE"]<-"pMUL"
+d$ser2[d$service=="URGENCES"]<-"aMUL"
+d$ser2[d$service=="S.A.U. (ADULTES)"]<-"aSAV"
+d$ser2[d$service=="PEDIATRIE"]<-"pSAV"
+d$ser2[d$service=="Acceuil des urgences"]<-"sSEL"
+d$ser2[d$Organisme=="CH de Thann" & d$service=="Urgences"]<-"sTAN"
+d$ser2[d$Organisme=="CH de Wissembourg" & d$service=="Urgences"]<-"sWIS"
+d$ser2[d$service=="Urgences Médico-Chirurgicales NHC"]<-"NHC"
+d$ser2[d$service=="Urgences chirurgicales pédiatriques"]<-"pHTP"
+d$ser2[d$service=="Urgences Adulte HTP"]<-"aHTP"
+d$ser2[d$service=="Gynéco-Obstétrique (HTP)"]<-"gHTP"
+d$ser2[d$service=="SOS Main"]<-"sDIA"
+d$ser2[d$Organisme=="Clinique Ste Odile (Strasbourg" & d$service=="UPATOU"]<-"sODI"
+d$ser2[d$service=="UPATOU (Structure des urgences)"]<-"sCTF"
+d$ser2[d$Organisme=="CH de Wissembourg" & d$service=="Urgences "]<-"sWIS"
+```
+Sauvegarde:
+```{r}
+save(d,file="sau2013.Rda")
+```
+Chargement:
+load("sau2013.Rda")
+
+Résumé des donnnées
+-------------------
+d = dataframe pour 2013
+```{r resume}
+names(d)
+```
+
+
+analyse des données
+-------------------
+Tableau de l'ensemble des passages par jour pour l'ensemble des SAU:
+```{r}
+hosp2013<-tapply(d$hospitalisés,d$date,sum)
+hosp2013
+```
+Moyenne des passages par jour ensemble des SAU:
+```{r}
+mean(hosp2013)
+summary(hosp2013)
+plot(hosp2013,pch=19,col="red",ylab="Passages",xlab="Semaines")
+abline(h = mean(hosp2013))
+```
+
+Moyenne des passages par jour/SAU
+```{r}
+a<-tapply(d$TOTAL.passages,d$date,mean)
+a
+```
+Ratio hospitalisation/passage. Hospitalisation est la somme des hospitalisations dans les servives + UHCD:
+```{r}
+hosp2013<-tapply(d$hospitalisés,d$date,sum)
+b<-round(100*(d$hospitalisés + d$UHCD)/d$TOTAL.passages,2)
+
+```
+taux moyen d'hospitalisation durant la période:
+```{r}
+m1<-mean(b,na.rm=T)
+m1
+sd(b,na.rm=T)
+```
+Taux moyen d'hospitalisation par jour:
+```{r}
+a<-tapply(b,d$date,mean,na.rm=T)
+plot(a,pch=19,col="red")
+abline(h = m1,col="blue")
+```
+Comparaison 2013 - 2012
+-----------------------
+On récupère les données 2012 et on utilise par(new=T) pour superposer 2 graphiques:
+```{r}
+load("../SAU2012/sau2012.Rda")
+a2<-tapply(d2$TOTAL.passages,d2$date,sum)
+a<-tapply(d$TOTAL.passages,d$date,sum)
+# sauvegarde des paramètres graphique
+old <- par()
+# calcul d'une ordonnée commune aux 2 courbes
+ylim1 <- range(c(max(a),min(a2)))
+# on trace la première
+plot(a,ylim=ylim1,pch=19,col="red",ylab="Passages",xlab="1er janvier au 21 février",main="Comparaison 2012-2013",sub="(Ensemble des services d'urgence d'Alsace)")
+# on modifie par() pour forcer la superposition
+par(new=TRUE,ann=FALSE)
+# desssin de la 2ème courbe
+plot(a2,ylim=ylim1,pch=19,col="blue",axes=FALSE)
+# tracé des droites moyennes
+abline(h = mean(a2),col="blue")
+abline(h = mean(a),col="red")
+# tracé des lignes joignant les points
+lines(a,ylim=ylim1,pch=19,col="red")
+lines(a2,ylim=ylim1,pch=19,col="blue")
+# ajout de la légende
+legend(40,1400,c("2012","2013"),lty=c(1,1),lwd=c(2.5,2.5),col=c("blue","red"),bty="n")
+# copyright
+mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
+# restauration des paramètres graphiques
+par(old)
+```
+Comparaison des activités:
+```{r}
+n<-length(a)
+n
+summary(a)
+summary(a2[1:n])
+round((mean(a)/mean(a2[1:n]) -1)*100,2)
+```
+Pour présenter ces tableaux en Latex:
+
+stargazer(as.data.frame(a),summary=TRUE)
+
+stargazer(as.data.frame(a2[1:length(a)]),summary=TRUE,digit.separator=" ",digits=2,median=TRUE,iqr=TRUE)
+
+voir RPU2013/sweve/test pour un exemple
+
+
+Utilisation de la librairie *zoo*
+```{r zoo}
+library("zoo")
+tsa<-zoo(a,unique(d$date))
+head(tsa)
+plot(tsa)
+tsb<-zoo(a2,unique(d2$date))
+plot(tsb)
+```
+Moyenne lissée sur 7 jours
+```{r}
+ma <- rollmean(tsa, 7)
+plot(ma, main="Moyenne lissée sur 7 jours")
+
+mb <- rollmean(tsb, 7)
+plot(mb, main="Moyenne lissée sur 7 jours")
+```
+Utilisation de *xts*
+```{r xts}
+library("xts")
+ts2<-xts(a,unique(d$date))
+```
+Combinaison des deux courbes:
+```{r zoo2}
+tsc<-zoo(cbind(a,a2[1:length(a)]),unique(d$date))
+plot(tsc)
+plot(tsc ,screens=1,col=c("red","blue"),main="Activité des SU en 2012 et 2013",ylab="nombre de passages")
+legend(as.Date("2013-01-01"), 1800, c("2013","2012"),col=c("red", "blue"),lty="solid")
+mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
+```
+moyennes lissées:
+```{r lissage}
+tsc2<-zoo(cbind(as.numeric(ma),as.numeric(mb[1:length(ma)])),unique(d$date))
+plot(tsc2 ,screens=1,col=c("red","blue"),main="Activité des SU en 2012 et 2013",ylab="nombre de passages",ylim=c(800,1400))
+legend(as.Date("2013-01-01"), 1400, c("2013","2012"),col=c("red", "blue"),lty="solid")
+mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
+```
+Activité des SAMU
+=================
+```{r samu}
+samu<-read.csv("samu2013.csv",header=TRUE)
+names(samu)
+samu$date<-as.Date(samu$date,"%d/%m/%Y")
+min(samu$date)
+max(samu$date)
+```
+
+Créer 2 SAMU:
+```{r s67s68}
+s67<-samu[samu$service=="SAMU 67",]
+s68<-samu[samu$service=="SAMU 68",]
+ts67<-zoo(s67$affaires,s67$date)
+plot(ts67)
+ts68<-zoo(s68$affaires,s68$date)
+plot(ts68)
+tssa<-zoo(cbind(s67$affaires,s68$affaires),s67$date)
+plot(tssa)
+
+plot(tssa ,screens=1,col=c("red","blue"),main="Activité des SAMU en 2013",ylab="nombre d'affaires",ylim=c(400,1600),xlab="Date(jours)")
+legend(as.Date("2013-01-01"), 1600, c("SAMU 67","SAMU 68"),col=c("red", "blue"),lty="solid",cex=0.5)
+mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
+```
+Courbes lissées
+```{r samu_lissage}
+m67 <- rollmean(tssa, 7)
+plot(m67 ,screens=1,col=c("red","blue"),main="Activité des SAMU en 2013",ylab="nombre d'affaires",ylim=c(400,1600),xlab="Date(jours)")
+legend(as.Date("2013-01-01"), 1600, c("SAMU 67","SAMU 68"),col=c("red", "blue"),lty="solid",cex=0.5)
+mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
+```
+Chargement du fichier pour 2012:
+---------------------------------
+```{r samu2012}
+samu2012<-read.csv("samu2012.csv",header=TRUE)
+names(samu2012)
+samu2012$date<-as.Date(samu2012$date,"%d/%m/%Y")
+min(samu2012$date)
+max(samu2012$date)
+
+min(samu2012$date[samu2012$service=="SAMU 68"])
+```
+Il manque les données pour le premier semestre 2012 pour le samu 68
+
+Créer les SAMU:
+```{r samu67_2012}
+s672012<-samu2012[samu2012$service=="SAMU 67",]
+ts672012a<-zoo(s672012$affaires,s672012$date)
+plot(ts672012a,main="Affaires - SAMU 67 en 2012")
+m67672012a <- rollmean(ts672012a, 7)
+plot(m67672012a,main="Affaires (lissage) - SAMU 67 en 2012")
+```
+Comparaison 2012-2013
+```{r comp.2012-2013}
+tssa2<-zoo(cbind(s67$affaires,s672012$affaires),s67$date)
+plot(tssa2,screens=1,col=c("red","blue"),main="Comparaison 2012-2013")
+tssa2lisse<-rollmean(tssa2, 7)
+plot(tssa2lisse,screens=1,col=c("red","blue"),main="Comparaison 2012-2013 (moyennes lissées)",xlab="Activité du SAMU 67",ylab="Nb.affaires/jour")
+legend(as.Date("2013-01-01"), 1400, c("2013","2012"),col=c("red", "blue"),lty="solid",cex=0.8)
+mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
+```
+Comparaison passages/hospitalisations
+-------------------------------------
+```{r passages-hospit}
+hosp2013<-tapply(d$hospitalisés,d$date,sum)
+mean(hosp2013)
+sd(passage2013)
+median(passage2013)
+
+passage2013<-tapply(d$TOTAL.passages,d$date,sum)
+mean(passage2013)
+sd(passage2013)
+median(passage2013)
+
+round(mean(hosp2013)*100/mean(passage2013),2)
+
+a<-cbind(passage2013,hosp2013)
+zoo2013<-zoo(a,unique(d$date))
+plot(zoo2013)
+zoo2013lisse<-rollmean(zoo2013, 7)
+plot(zoo2013lisse,screens=1,main="2013 - Passages vs hospitalisation",col=c("red","blue"),xlab="Moyennes lissées")
+legend(as.Date("2013-01-01"), 800, c("passages","hospitalizations"),col=c("red", "blue"),lty="solid",cex=0.8)
+mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
+```
+
+
+
+
+

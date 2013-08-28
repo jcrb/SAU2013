@@ -1,0 +1,41 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+% Table created by StarGazer v.3.0.1 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: sam., mai 18, 2013 - 11:54:25
+\begin{table}[htb] \centering 
+  \caption{} 
+  \label{} 
+\footnotesize 
+
+\begin{tabular}{@{\extracolsep{5pt}}l c c c c c } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{Max} \\ 
+\hline \\[-1.8ex] 
+a & 121 & 1,126.165 & 95.266 & 911 & 1,392 \\ 
+\hline \\[-1.8ex] 
+\normalsize 
+\end{tabular} 
+\end{table} 
+
+% Table created by StarGazer v.3.0.1 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: sam., mai 18, 2013 - 12:10:42
+\begin{table}[htb] \centering 
+  \caption{Activite 2012} 
+  \label{Activite 2012} 
+\footnotesize 
+
+\begin{tabular}{@{\extracolsep{5pt}}l c c c c c c c c } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{Pctl(25)} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{Pctl(75)} & \multicolumn{1}{c}{Max} \\ 
+\hline \\[-1.8ex] 
+a2[1:length(a)] & 121 & 957.72 & 117.80 & 760 & 883 & 944 & 1 015 & 1 845 \\ 
+\hline \\[-1.8ex] 
+\normalsize 
+\end{tabular} 
+\end{table} 
+\end{document}
