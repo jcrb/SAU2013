@@ -9,7 +9,7 @@ as.character(Sys.Date())
 ```
 
 ```
-## [1] "2013-08-28"
+## [1] "2013-10-12"
 ```
 
 ```r
@@ -17,14 +17,14 @@ sessionInfo()
 ```
 
 ```
-## R version 2.15.1 (2012-06-22)
+## R version 3.0.2 (2013-09-25)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
 ## 
 ## locale:
 ##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C              
 ##  [3] LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
 ##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8   
-##  [7] LC_PAPER=C                 LC_NAME=C                 
+##  [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
 ##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
 ## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
@@ -32,11 +32,10 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] knitr_1.4.1
+## [1] knitr_1.5
 ## 
 ## loaded via a namespace (and not attached):
-## [1] digest_0.6.3   evaluate_0.4.7 formatR_0.9    stringr_0.6.2 
-## [5] tools_2.15.1
+## [1] evaluate_0.5.1 formatR_0.9    stringr_0.6.2  tools_3.0.2
 ```
 
 Introduction
@@ -76,8 +75,8 @@ str(samu)
 ```
 
 ```
-## 'data.frame':	423 obs. of  11 variables:
-##  $ date       : Factor w/ 212 levels "10/01/2013","10/02/2013",..: 170 159 153 147 140 133 126 119 112 105 ...
+## 'data.frame':	547 obs. of  11 variables:
+##  $ date       : Factor w/ 274 levels "10/01/2013","10/02/2013",..: 219 204 196 188 179 170 161 152 143 134 ...
 ##  $ service    : Factor w/ 2 levels "SAMU 67","SAMU 68": 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ affaires   : int  307 338 300 480 492 354 311 317 316 314 ...
 ##  $ primaires  : int  31 45 33 35 39 31 41 35 38 21 ...
@@ -96,7 +95,7 @@ max(samu$date)
 ```
 
 ```
-## [1] "2013-07-31"
+## [1] "2013-10-01"
 ```
 
 Période d'étude:
@@ -106,7 +105,7 @@ range(samu$date)
 ```
 
 ```
-## [1] "2013-01-01" "2013-07-31"
+## [1] "2013-01-01" "2013-10-01"
 ```
 
 Variables
@@ -135,11 +134,12 @@ library("zoo")
 ```
 
 ```
+## 
 ## Attaching package: 'zoo'
 ## 
-## The following object(s) are masked from 'package:base':
+## Les objets suivants sont masqués from 'package:base':
 ## 
-## as.Date, as.Date.numeric
+##     as.Date, as.Date.numeric
 ```
 
 ```r
@@ -167,7 +167,7 @@ aff_samu67
 ```
 
 ```
-## [1] 142770
+## [1] 163747
 ```
 
 ```r
@@ -175,7 +175,7 @@ mean(samu67$affaires)
 ```
 
 ```
-## [1] 673.4
+## [1] 597.6
 ```
 
 ```r
@@ -183,7 +183,7 @@ aff_samu68
 ```
 
 ```
-## [1] 115885
+## [1] 146801
 ```
 
 ```r
@@ -191,7 +191,7 @@ mean(samu68$affaires)
 ```
 
 ```
-## [1] 549.2
+## [1] 537.7
 ```
 
 ```r
@@ -202,11 +202,11 @@ tapply(samu$affaires, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     274     336     700     673     895    1450 
+##     234     316     458     598     832    1450 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     360     481     522     549     622     793
+##     360     471     511     538     598     793
 ```
 
 ```r
@@ -216,11 +216,11 @@ tapply(samu$primaire, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    16.0    34.0    39.0    39.3    44.2    60.0 
+##    16.0    32.2    38.0    37.7    43.0    60.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     6.0    13.0    16.0    16.1    19.0    31.0
+##     6.0    13.0    16.0    16.2    19.0    31.0
 ```
 
 ```r
@@ -230,11 +230,11 @@ tapply(samu$secondaire, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     0.0     5.0     8.0     7.9    10.0    19.0 
+##    0.00    5.00    8.00    7.71   10.00   19.00 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    0.00    4.00    6.00    6.17    8.00   22.00
+##     0.0     4.0     6.0     6.2     8.0    22.0
 ```
 
 ```r
@@ -244,11 +244,11 @@ tapply(samu$néonat, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    0.00    0.00    1.00    1.43    2.00    8.00 
+##    0.00    0.00    1.00    1.39    2.00    8.00 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.0000  0.0000  0.0000  0.0616  0.0000  2.0000
+##  0.0000  0.0000  0.0000  0.0659  0.0000  2.0000
 ```
 
 ```r
@@ -272,11 +272,11 @@ tapply(samu$ASSU, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    59.0    85.0    94.5    95.8   107.0   153.0 
+##    57.0    81.0    90.0    92.2   103.0   153.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     9.0    19.0    22.0    22.2    26.0    39.0
+##     9.0    19.0    22.0    22.4    26.0    39.0
 ```
 
 ```r
@@ -286,11 +286,11 @@ tapply(samu$VSAV, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    15.0    25.0    29.5    30.4    35.0    67.0 
+##    15.0    24.0    29.0    29.5    34.0    67.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    47.0    70.5    80.0    80.6    90.0   118.0
+##    47.0    71.0    81.0    81.1    91.0   118.0
 ```
 
 ```r
@@ -300,11 +300,11 @@ tapply(samu$conseils, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    26.0    51.8    67.0    80.0    96.2   252.0 
+##    26.0    50.0    65.0    76.1    90.0   252.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##      86     124     148     165     193     445
+##      78     120     145     161     191     445
 ```
 
 ```r
@@ -314,30 +314,30 @@ tapply(samu$Medecin, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    25.0    43.8    56.0    95.2   139.0   356.0 
+##    21.0    41.0    53.5    89.6   120.0   356.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    16.0    30.5    39.0    60.6    84.5   260.0
+##    11.0    29.0    38.0    56.5    77.0   260.0
 ```
 
 taux de recours
 ---------------
 
 ```r
-aff_samu67 * 2/pop.67.2010.municipale
+round(aff_samu67 * 100/pop.67.2010.municipale, 2)
 ```
 
 ```
-## [1] 0.2606
+## [1] 14.94
 ```
 
 ```r
-aff_samu68 * 2/pop.68.2010.municipale
+round(aff_samu68 * 100/pop.68.2010.municipale, 2)
 ```
 
 ```
-## [1] 0.3091
+## [1] 19.58
 ```
 
 

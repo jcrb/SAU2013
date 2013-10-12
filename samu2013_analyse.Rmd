@@ -92,8 +92,8 @@ tapply(samu$Medecin,samu$service,summary)
 taux de recours
 ---------------
 ```{r recours}
-aff_samu67*2/pop.67.2010.municipale
-aff_samu68*2/pop.68.2010.municipale
+round(aff_samu67*100/pop.67.2010.municipale,2)
+round(aff_samu68*100/pop.68.2010.municipale,2)
 ```
 
 Graphiques
