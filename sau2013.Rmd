@@ -1,75 +1,26 @@
-Etude des SAU d'Alsace sur 50 jours
+Etude des SAU d'Alsace en 2013
 ========================================================
 
-L'étude porte du 1/1/2013 au 22/2/2013 avec un compatatif sur la même période en 2012.
+L'étude porte du 1/1/2013 au 31/12/2013 avec un compatatif sur la même période en 2012.
 Les données sont extraite de SAGEC HUS et copiées/collées dans un tableur libre office. La dernière colonne (supprimer) est supprimées. La feuille est enregistrée sous *sau2013.csv*
+
+Le présent document exploite les données du fichier binaire *sau2013.Rda* (voir le document *sau2013_Preparation_donnees.Rmd* pour la création de ce fichier).
+
 ```{r}
 file<-"~/Documents/Resural/Stat Resural/SAU2013"
 setwd(file)
 timestamp()
-d<-read.csv("sau2013.csv",header=TRUE)
-```
-Préparation des données
-------------------------
-Transformation de la colonne *date* du format jj/mm/aaaa au format yyyy-mm-dd
-```{r}
-d$date<-as.Date(d$date,"%d/%m/%Y")
-```
-Renommage de la colonne *organisme* par la création d'une nouvelle colonne *hop*
-NB: on ignore le CMCO. Deux structures sont absentes de la base: Sta anne et Diaconnat-Fonderie
-```{r}
-d$hop[d$Organisme=="CCOM"]<-"HUS"
-d$hop[d$Organisme=="CH Altkirch"]<-"ALK"
-d$hop[d$Organisme=="CH de Colmar (CMC Le Parc)"]<-"COL"
-d$hop[d$Organisme=="CH de Colmar (Louis Pasteur)"]<-"COL"
-d$hop[d$Organisme=="CH de Guebwiller"]<-"GEB"
-d$hop[d$Organisme=="CH de Mulhouse ( Hasenrain)"]<-"MUL"
-d$hop[d$Organisme=="CH de Mulhouse (Emile Muller-Moenschberg"]<-"MUL"
-d$hop[d$Organisme=="CH de Saverne"]<-"SAV"
-d$hop[d$Organisme=="CH de Sélestat"]<-"SEL"
-d$hop[d$Organisme=="CH de Thann"]<-"TAN"
-d$hop[d$Organisme=="CH de Wissembourg"]<-"WIS"
-d$hop[d$Organisme=="CHU de Strasbourg (Hôp. Civil)"]<-"HUS"
-d$hop[d$Organisme=="CHU de Strasbourg(Hautepierre)"]<-"HUS"
-d$hop[d$Organisme=="Clinique des Diaconesses"]<-"DIA"
-d$hop[d$Organisme=="Clinique Ste Odile (Strasbourg"]<-"ODI"
-d$hop[d$Organisme=="Clinique des 3 Frontières"]<-"CTF"
-```
-Renommage de la colonne *service* par la création d'une nouvelle colonne *ser2*
-```{r}
-d$ser2[d$service=="CCOM Chirurgie"]<-"CCOM"
-d$ser2[d$service=="Upatou"]<-"sALK"
-d$ser2[d$service=="SAU Le Parc"]<-"pCOL"
-d$ser2[d$service=="SAU Pasteur"]<-"aCOL"
-d$ser2[d$service=="UHTCD"]<-"sGEB"
-d$ser2[d$service=="PEDIATRIE NEONATOLOGIE"]<-"pMUL"
-d$ser2[d$service=="URGENCES"]<-"aMUL"
-d$ser2[d$service=="S.A.U. (ADULTES)"]<-"aSAV"
-d$ser2[d$service=="PEDIATRIE"]<-"pSAV"
-d$ser2[d$service=="Acceuil des urgences"]<-"sSEL"
-d$ser2[d$Organisme=="CH de Thann" & d$service=="Urgences"]<-"sTAN"
-d$ser2[d$Organisme=="CH de Wissembourg" & d$service=="Urgences"]<-"sWIS"
-d$ser2[d$service=="Urgences Médico-Chirurgicales NHC"]<-"NHC"
-d$ser2[d$service=="Urgences chirurgicales pédiatriques"]<-"pHTP"
-d$ser2[d$service=="Urgences Adulte HTP"]<-"aHTP"
-d$ser2[d$service=="Gynéco-Obstétrique (HTP)"]<-"gHTP"
-d$ser2[d$service=="SOS Main"]<-"sDIA"
-d$ser2[d$Organisme=="Clinique Ste Odile (Strasbourg" & d$service=="UPATOU"]<-"sODI"
-d$ser2[d$service=="UPATOU (Structure des urgences)"]<-"sCTF"
-d$ser2[d$Organisme=="CH de Wissembourg" & d$service=="Urgences "]<-"sWIS"
-```
-Sauvegarde:
-```{r}
-save(d,file="sau2013.Rda")
-```
-Chargement:
+# Chargement:
 load("sau2013.Rda")
+```
 
 Résumé des donnnées
 -------------------
 d = dataframe pour 2013
 ```{r resume}
 names(d)
+min(d$date)
+max(d$date)
 ```
 
 
@@ -78,28 +29,52 @@ analyse des données
 Tableau de l'ensemble des passages par jour pour l'ensemble des SAU:
 ```{r}
 hosp2013<-tapply(d$hospitalisés,d$date,sum)
-hosp2013
+# hosp2013
+
+# nombre total de passages
+sum(d$TOTAL.passages)
 ```
 Moyenne des passages par jour ensemble des SAU:
+-----------------------------------------------
 ```{r}
 mean(hosp2013)
 summary(hosp2013)
-plot(hosp2013,pch=19,col="red",ylab="Passages",xlab="Semaines")
-abline(h = mean(hosp2013))
+plot(hosp2013,pch=19,col="red",ylab="Passages",xlab="Jours",type="l")
+abline(h = mean(hosp2013),col="blue")
 ```
 
-Moyenne des passages par jour/SAU
+Passages par jour/SAU
+----------------------
 ```{r}
-a<-tapply(d$TOTAL.passages,d$date,mean)
+a<-tapply(d$TOTAL.passages,d$hop,sum)
 a
+barplot(sort(a),cex.names=.5,cex.axis=.5,ylab="nombre de passages",xlab="Services d'urgence",main="Passages dans les sercices d'urgence en 2013")
 ```
-Ratio hospitalisation/passage. Hospitalisation est la somme des hospitalisations dans les servives + UHCD:
+
+Comparaison SAU - RPU
+---------------------
+Saisie manuelle. Données à jour au 31 octobre 2013.
+```{r sau_rpu,echo=FALSE}
+a<-c("3FR","ALK","COL","DIA","GUE","HUS","MUL","ODI","SAV","SEL","TAN","WIS","HAG","ANN")
+sau<-c(13767,11933,53502,6157,13000,91652,51496,21196,22270,18076,12342,9154,0,12139)
+rpu<-c(13250,6007,54517,24623,12743,31075,46543,21710,7660,18502,0,10638,29184,0)
+b<-rbind(sau,rpu)
+colnames(b)<-a
+c<-c("lightblue","blue")
+barplot(b,beside=T,col=c,las=2,main="Données des SU versus RPU transmis",sub="(au 31/10/2013)")
+legend(x="topright",legend=c("SAU","RPU"),border=T,pch=15,col=c,bty="n")
+```
+
+Ratio hospitalisation/passage.
+------------------------------
+Hospitalisation est la somme des hospitalisations dans les servives + UHCD:
 ```{r}
 hosp2013<-tapply(d$hospitalisés,d$date,sum)
 b<-round(100*(d$hospitalisés + d$UHCD)/d$TOTAL.passages,2)
 
 ```
 taux moyen d'hospitalisation durant la période:
+----------------------------------------------
 ```{r}
 m1<-mean(b,na.rm=T)
 m1
