@@ -53,7 +53,7 @@ barplot(sort(a),cex.names=.5,cex.axis=.5,ylab="nombre de passages",xlab="Service
 
 Comparaison SAU - RPU
 ---------------------
-Saisie manuelle. Données à jour au 31 octobre 2013.
+Saisie manuelle. Données à jour au 31 octobre 2013. *sau* sont les données obtenues au paragraphe *Passages par jour/SAU*. les données *rpu* sont fournies par le programme *rpu2013*.
 ```{r sau_rpu,echo=FALSE}
 a<-c("3FR","ALK","COL","DIA","GUE","HUS","MUL","ODI","SAV","SEL","TAN","WIS","HAG","ANN")
 sau<-c(13767,11933,53502,6157,13000,91652,51496,21196,22270,18076,12342,9154,0,12139)
