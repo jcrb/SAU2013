@@ -9,7 +9,7 @@ as.character(Sys.Date())
 ```
 
 ```
-## [1] "2013-10-12"
+## [1] "2014-01-09"
 ```
 
 ```r
@@ -35,7 +35,7 @@ sessionInfo()
 ## [1] knitr_1.5
 ## 
 ## loaded via a namespace (and not attached):
-## [1] evaluate_0.5.1 formatR_0.9    stringr_0.6.2  tools_3.0.2
+## [1] evaluate_0.5.1 formatR_0.10   stringr_0.6.2  tools_3.0.2
 ```
 
 Introduction
@@ -75,8 +75,8 @@ str(samu)
 ```
 
 ```
-## 'data.frame':	547 obs. of  11 variables:
-##  $ date       : Factor w/ 274 levels "10/01/2013","10/02/2013",..: 219 204 196 188 179 170 161 152 143 134 ...
+## 'data.frame':	741 obs. of  11 variables:
+##  $ date       : Factor w/ 370 levels "10/01/2013","10/02/2013",..: 291 271 260 249 237 225 213 201 189 177 ...
 ##  $ service    : Factor w/ 2 levels "SAMU 67","SAMU 68": 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ affaires   : int  307 338 300 480 492 354 311 317 316 314 ...
 ##  $ primaires  : int  31 45 33 35 39 31 41 35 38 21 ...
@@ -95,7 +95,7 @@ max(samu$date)
 ```
 
 ```
-## [1] "2013-10-01"
+## [1] "2014-01-05"
 ```
 
 Période d'étude:
@@ -105,7 +105,7 @@ range(samu$date)
 ```
 
 ```
-## [1] "2013-01-01" "2013-10-01"
+## [1] "2013-01-01" "2014-01-05"
 ```
 
 Variables
@@ -167,7 +167,7 @@ aff_samu67
 ```
 
 ```
-## [1] 163747
+## [1] 228721
 ```
 
 ```r
@@ -175,7 +175,7 @@ mean(samu67$affaires)
 ```
 
 ```
-## [1] 597.6
+## [1] 616.5
 ```
 
 ```r
@@ -183,7 +183,7 @@ aff_samu68
 ```
 
 ```
-## [1] 146801
+## [1] 196120
 ```
 
 ```r
@@ -191,7 +191,7 @@ mean(samu68$affaires)
 ```
 
 ```
-## [1] 537.7
+## [1] 530.1
 ```
 
 ```r
@@ -202,11 +202,11 @@ tapply(samu$affaires, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     234     316     458     598     832    1450 
+##     234     318     500     616     841    1450 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     360     471     511     538     598     793
+##     360     463     508     530     590     793
 ```
 
 ```r
@@ -216,11 +216,11 @@ tapply(samu$primaire, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    16.0    32.2    38.0    37.7    43.0    60.0 
+##    16.0    31.0    36.0    36.8    41.0    60.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     6.0    13.0    16.0    16.2    19.0    31.0
+##     6.0    13.0    16.0    16.4    19.0    32.0
 ```
 
 ```r
@@ -230,11 +230,11 @@ tapply(samu$secondaire, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    0.00    5.00    8.00    7.71   10.00   19.00 
+##    0.00    5.00    8.00    7.57   10.00   19.00 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     0.0     4.0     6.0     6.2     8.0    22.0
+##    0.00    4.00    6.00    6.24    8.00   22.00
 ```
 
 ```r
@@ -244,11 +244,11 @@ tapply(samu$néonat, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    0.00    0.00    1.00    1.39    2.00    8.00 
+##    0.00    0.00    1.00    1.35    2.00    8.00 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.0000  0.0000  0.0000  0.0659  0.0000  2.0000
+##  0.0000  0.0000  0.0000  0.0622  0.0000  2.0000
 ```
 
 ```r
@@ -272,11 +272,11 @@ tapply(samu$ASSU, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    57.0    81.0    90.0    92.2   103.0   153.0 
+##    57.0    81.0    92.0    92.9   103.0   153.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     9.0    19.0    22.0    22.4    26.0    39.0
+##     9.0    19.0    22.5    22.7    26.0    39.0
 ```
 
 ```r
@@ -286,11 +286,11 @@ tapply(samu$VSAV, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    15.0    24.0    29.0    29.5    34.0    67.0 
+##    12.0    24.0    28.0    28.8    33.0    67.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    47.0    71.0    81.0    81.1    91.0   118.0
+##    47.0    71.2    81.0    81.5    90.0   120.0
 ```
 
 ```r
@@ -300,11 +300,11 @@ tapply(samu$conseils, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    26.0    50.0    65.0    76.1    90.0   252.0 
+##    26.0    51.0    67.0    78.4    94.0   252.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##      78     120     145     161     191     445
+##      70     120     144     163     194     461
 ```
 
 ```r
@@ -314,11 +314,11 @@ tapply(samu$Medecin, samu$service, summary)
 ```
 ## $`SAMU 67`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    21.0    41.0    53.5    89.6   120.0   356.0 
+##    21.0    42.0    54.0    91.8   127.0   356.0 
 ## 
 ## $`SAMU 68`
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    11.0    29.0    38.0    56.5    77.0   260.0
+##    10.0    28.0    37.5    56.8    82.0   260.0
 ```
 
 taux de recours
@@ -329,7 +329,7 @@ round(aff_samu67 * 100/pop.67.2010.municipale, 2)
 ```
 
 ```
-## [1] 14.94
+## [1] 20.87
 ```
 
 ```r
@@ -337,7 +337,7 @@ round(aff_samu68 * 100/pop.68.2010.municipale, 2)
 ```
 
 ```
-## [1] 19.58
+## [1] 26.16
 ```
 
 
@@ -347,7 +347,23 @@ Graphiques
 
 ```r
 z67 <- zoo(samu67$affaires, samu67$date)
+```
+
+```
+## Warning: some methods for "zoo" objects do not work if the index entries
+## in 'order.by' are not unique
+```
+
+```r
 z68 <- zoo(samu68$affaires, samu68$date)
+```
+
+```
+## Warning: some methods for "zoo" objects do not work if the index entries
+## in 'order.by' are not unique
+```
+
+```r
 
 plot(z68, ylim = c(200, 1500), col = "blue", xlab = "", ylab = "")
 lines(z67, ylim = c(200, 1500), col = "red")
