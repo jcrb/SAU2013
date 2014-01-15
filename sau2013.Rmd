@@ -256,7 +256,21 @@ legend(as.Date("2013-01-01"), 800, c("passages","hospitalizations"),col=c("red",
 mtext("© RESURAL 2013",cex=0.5,side=4,line=-1,adj=0.1)
 ```
 
+CH de Thann
+============
+Le CHT ne produit pas de RPU. Les seules indications d'activité sont celles fournies par le serveur régional
 
-
+```{r thann}
+tha <- d[d$Organisme=="CH de Thann",]
+n_than <- sum(tha$TOTAL.passages)
+n_1an <- sum(tha$moins.de.1.an)
+n_adulte <- sum(tha$entre.1.et.75.ans)
+n_75ans <- sum(tha$plus.de.75.ans)
+```
+- nombre de passages à Thann: `r n_than`
+- nombre de résumés produits: `r nrow(tha)`
+- moins de 1 an: `r n_1an` (`r round(n_1an * 100 / n_than,2)` %)
+- moins de 75 ans: `r n_adulte` (`r round(n_adulte * 100 / n_than,2)` %)
+- plus de 75 ans: `r n_75ans`
 
 
