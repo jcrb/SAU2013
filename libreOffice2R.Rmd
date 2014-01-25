@@ -20,7 +20,7 @@ max(d2$date)
 ```
 
 Renommage de la colonne *organisme* par la création d'une nouvelle colonne *hop*
-NB: on ignore le CMCO. Deux structures sont absentes de la base: Sta anne et Diaconnat-Fonderie
+NB: on ignore le CMCO. Trois structures sont absentes de la base: Sta Anne, Diaconnat-Fonderie et Haguenau.
 ```{r}
 d2$hop[d2$Organisme=="CCOM"]<-"HUS"
 d2$hop[d2$Organisme=="CH Altkirch"]<-"ALK"

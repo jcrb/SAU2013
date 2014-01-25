@@ -2,7 +2,7 @@ Etude des SAU d'Alsace en 2013
 ========================================================
 
 L'étude porte du 1/1/2013 au 31/12/2013 avec un compatatif sur la même période en 2012.
-Les données sont extraite de SAGEC HUS et copiées/collées dans un tableur libre office. La dernière colonne (supprimer) est supprimées. La feuille est enregistrée sous *sau2013.csv*
+Les données sont extraite de SAGEC HUS et copiées/collées dans un tableur libre office. La dernière colonne (supprimer) est supprimée. La feuille est enregistrée sous *sau2013.csv*
 
 Le présent document exploite les données du fichier binaire *sau2013.Rda* (voir le document *sau2013_Preparation_donnees.Rmd* pour la création de ce fichier).
 
@@ -12,7 +12,31 @@ setwd(file)
 timestamp()
 # Chargement:
 load("sau2013.Rda")
+library("xts")
+library("zoo")
 ```
+
+Retraitement des données pour SAverne
+-------------------------------------
+Saverne envoie 2 fichiers, l'un pour les adultes, l'autre pour les enfants. On  effectue un regroupement des deux:
+- savp = secteur pédiatrique
+- sava = secteur adulte
+
+```{r saverne}
+sav <- d[d$Organisme == "CH de Saverne",]
+savp <- d[d$Organisme == "CH de Saverne" & d$service == "PEDIATRIE",]
+sava <- d[d$Organisme == "CH de Saverne" & d$ser2 == "aSAV",]
+sav <- sava
+sav$service <- "SU Saverne"
+sav$moins.de.1.an <- savp$moins.de.1.an
+sav$entre.1.et.75.ans <- sava$entre.1.et.75.ans + savp$entre.1.et.75.ans
+sav$TOTAL.passages <- sava$TOTAL.passages + savp$TOTAL.passages
+sav$hospitalisés <- sava$hospitalisés + savp$hospitalisés
+sav$UHCD <- sava$UHCD + savp$UHCD
+sav$Transferts <- sava$Transferts + savp$Transferts
+
+```
+
 
 Résumé des donnnées
 -------------------
@@ -21,19 +45,88 @@ d = dataframe pour 2013
 names(d)
 min(d$date)
 max(d$date)
-```
+nb_jour <- max(d$date)-min(d$date)
+dt <- seq(min(d$date), max(d$date),1) # vecteur temporel
+nb_jour
 
+summary(d$Organisme)
+# jours manquants
+summary(d$Organisme) - nb_jour
+```
+**Saverne** à le double des autres (adultes et pediatie)
 
 analyse des données
 -------------------
 Tableau de l'ensemble des passages par jour pour l'ensemble des SAU:
-```{r}
-hosp2013<-tapply(d$hospitalisés,d$date,sum)
-# hosp2013
-
+```{r passages}
 # nombre total de passages
 sum(d$TOTAL.passages)
 ```
+Analyse des hospitalisations
+----------------------------
+```{r hospit}
+hosp2013<-tapply(d$hospitalisés,d$date,sum)
+ts_zoo <- zoo(hosp2013, dt)
+plot(ts_zoo, main="2013-Hospitalisations hors UHCD", xlab="jours", ylab="Nombre d'hospitalisations")
+
+ts_xts <- xts(hosp2013, dt)
+plot(ts_xts, main="2013-Hospitalisations hors UHCD", xlab="jours", ylab="Nombre d'hospitalisations")
+
+# on combine 2 ts, passages et hospitalisations
+pass2013<-tapply(d$TOTAL.passages,d$date,sum)
+# taux hospitalisation
+tx <- hosp2013/pass2013
+# création matrice
+a <- cbind(hosp2013, pass2013,tx)
+ts_zoo <- zoo(a, dt)
+# deux courbes dans le même graphique
+plot(ts_zoo, screens=1)
+# deux graphiques superposés
+plot(ts_zoo, screens=c(1,2,3), main = "2013 - Passages vs Hospitalisations", ylab=c("Hospitalisations","Passages","Taux hosp."), col=c("blue","green","red"))
+# moyenne mobile
+k <- 7
+ma <- rollmean(ts_zoo, k)
+head(ma)
+sda <- rollapply(ts_zoo, k, sd, align="right")
+head(sda)
+
+plot(ts_zoo[,1], col="orange", main="2013 - Hospitalisations", ylab="nombre")
+lines(ma[,1], col="red", lty=2)
+lines(ma[,1]+sda[,1], col="red")
+lines(ma[,1]-sda[,1], col="red")
+legend("bottomleft", legend=c("nombre","moyenne lissée","ecart_type","moyenne mensuelle"), col=c("orange","red","red","blue"), lty=c(1,2,1,1))
+
+
+# moyenne des hospitalisations par mois
+mm <- apply.monthly(ts_zoo, mean)
+lines(mm[,1], col="blue")
+plot(mm[,1], col="blue", main="2013 - Moyenne des hospitalisations", ylab="moyenne")
+# ecart-type
+sdmm <- apply.monthly(ts_zoo, sd)
+# on peut faire les mêmes calculs par semaine, jour, années, quadrimestre
+# apply.weekly(ts, f)
+# colors <- ifelse(x >= 0, "black", "gray")
+
+# idem avec xts
+ts_xts <- xts(a, dt)
+plot(ts_xts[,2])
+plot(ts_xts[,1])
+plot(ts_xts[,3])
+# a priori xts ne sait faire que de l'univarié
+first(ts_xts, "5 days")
+last(ts_xts, "week")
+# accepte aussi years
+
+# on peut sélectionner un jour donné ou par périodes
+ts_xts[5]
+ts_xts[5,1]
+ts_xts[5:10]
+plot(ts_xts[5:10,2])
+
+ts_xts["2013-10-19"]
+ts_xts[seq(as.Date("2013-10-19"), as.Date("2013-10-25"), by=1)]
+```
+
 Moyenne des passages par jour ensemble des SAU:
 -----------------------------------------------
 ```{r}
@@ -48,22 +141,60 @@ Passages par jour/SAU
 ```{r}
 a<-tapply(d$TOTAL.passages,d$hop,sum)
 a
+# nombre total de passages:
+sum(a)
+
 barplot(sort(a),cex.names=.5,cex.axis=.5,ylab="nombre de passages",xlab="Services d'urgence",main="Passages dans les sercices d'urgence en 2013")
 ```
 
 Comparaison SAU - RPU
 ---------------------
-Saisie manuelle. Données à jour au 31 octobre 2013. *sau* sont les données obtenues au paragraphe *Passages par jour/SAU*. les données *rpu* sont fournies par le programme *rpu2013*.
+Saisie manuelle. Données à jour au 5 janvier 2014. *sau* sont les données obtenues au paragraphe *Passages par jour/SAU*. les données *rpu* sont fournies par le programme *rpu2013*.
+- Ste Anne 2013:    14661
+- données RPU pour 2013: 
+   3Fr   Alk   Col   Dia   Geb   Hag   Hus   Mul   Odi   Sel   Wis   Sav 
+ 15688  7126 64758 29469 15103 34414 37018 56195 25963 19790 12646 12424
+- données SAU pour 2013:
+ALK    COL    CTF    DIA    GEB    HUS    MUL    ODI    SAV    SEL     TAN    WIS
+14352  64650  16423   7078  15531 121190  62806  25675  26915  18076   14704  11205
+  
 ```{r sau_rpu,echo=FALSE}
+# si un nombre est sup à 10^6 alors la notation scientifiques est utilisée
+# voir ?option puis scipen pour explication (et http://yihui.name/knitr/demo/output/).
+options(scipen = 6, digits = 2)
+
+# met un espace comme séparateur de milliers. A mettre en début de document. Source: http://stackoverflow.com/questions/18965637/set-global-thousand-separator-on-knitr
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=" ")
+})
+
 a<-c("3FR","ALK","COL","DIA","GUE","HUS","MUL","ODI","SAV","SEL","TAN","WIS","HAG","ANN")
-sau<-c(13767,11933,53502,6157,13000,91652,51496,21196,22270,18076,12342,9154,0,12139)
-rpu<-c(13250,6007,54517,24623,12743,31075,46543,21710,7660,18502,0,10638,29184,0)
+
+sau<-c(16423, 14352, 64650, 7078, 15531, 121190, 62806, 25675, 26915, 18076, 14704, 11205, 0, 14661)
+
+rpu<-c(15688, 7126, 64758, 29469, 15103, 37018, 56195, 25963, 12424, 19790, 0, 12646, 34414, 0)
+
+s_sau <- sum(sau)
+s_rpu <- sum(rpu)
+p <- round(s_rpu*100/s_sau,2)
+
 b<-rbind(sau,rpu)
 colnames(b)<-a
+b
 c<-c("lightblue","blue")
-barplot(b,beside=T,col=c,las=2,main="Données des SU versus RPU transmis",sub="(au 31/10/2013)")
+barplot(b,beside=T,col=c,las=2,main="Données des SU versus RPU transmis",sub="(au 31/12/2013)")
 legend(x="topright",legend=c("SAU","RPU"),border=T,pch=15,col=c,bty="n")
 ```
+**Remarques**
+- *rpu* ce sont les RPU transmis à e-santé. A terme ce devrait être la seule donnée d'activité recueillie. On remarque pour 2013 qu'on est loin de l'exhaustivité.
+- *sau* données d'activité transmise au serveur régional de veille. Ces données sot recueillies depuis 2005 sauf pour trois établissements. Deux d'entre eus (StAnne et Diaconnat fonderie) n'existaient pas en tant que SU au moment de l'implantation du serveur. Le *CH Haguenau* a cessé d'émettre depuis plusieurs années.
+- le *SU Saverne* ne transmets des RPU que depuis fin juillet 2013
+- le *CH Thann* n'a jamais transmis de RPU
+- la Clinique Ste Anne ne transmet pas de RPU mais transmet des données d'activité quotidienne sur le modèle du serveur régional.
+
+- nb total de passages déclarés: **`r s_sau`**
+- nb total de RPU déclarés: **`r s_rpu`**  
+Si on suppose que le nb de passages déclarés est exact (en réalité sous estimé, par ex. Haguenau), l'exhaustivité mesurée est de l'ordre de **`r p` %**.
 
 Ratio hospitalisation/passage.
 ------------------------------

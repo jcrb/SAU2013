@@ -1,0 +1,111 @@
+\documentclass{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[autolanguage,np]{numprint}
+\usepackage{boxedminipage}
+
+\usepackage{longtable}
+\usepackage{rotating} 
+\usepackage{supertabular} 
+\usepackage{colortbl}
+
+\title{Exhaustivité des données}
+\author{Dr J-C. Bartier - RESURAL}
+\date{Janvier 2014}
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+Ce document compare le nombre de RPU transmis au nombre de passages déclarés au serveur de veille et d'alerte SAGEC.
+\end{abstract}
+
+<<init,echo=FALSE,message=FALSE>>=
+library("xts")
+library("zoo")
+library("lubridate")
+library("xtable")
+
+load("../sau2013.Rda")
+# les données sont dans le dataframe d
+@
+
+\section{Source des données}
+
+Les données concernant le nombre de passages dans les services d'urgence polyvalents d'Alsace proviennent de deux sources:
+\begin{enumerate}
+  \item le serveur de veille et d'alerte (SAGEC Alsace) recueille les données des établissements qui possédaient un service d'urgence en 2005 (Wisssembourg, Saverne, Haguenau, HUS, Clinique Saine-Odile, Sélestat, Colmar, Guebwiller, Thann, Alkirch, Clinique des trois frontières). Ces établissements remontent un bulletin quotidien \footnote{moins de 1 an, de 1 à 75 ans, plus de 75 ans, total des passages, UHCD, transferts}. On y ajoute la clinique Sainte-Anne depuis le 1er janvier 2013 qui transmet la même information.
+  \item les RPU transmis par douze des quatorze établissements ayant un service d'urgence polyvalent dont les médecins sont des urgentistes (Wisssembourg, Saverne, Haguenau, HUS, Clinique Saine-Odile, Sélestat, Colmar, Guebwiller, Thann, Alkirch, Clinique des trois frontières, Clinique Diaconnat-Fonderie). Cette procédure est active depuis le premier janvier 2013.
+\end{enumerate}
+
+Les RPU donnent des informations qui recouvrent toalement celles du serveur régional tout en apportant des informations beaucoup plus complètes et dont la granularité est plus fine. A terme, les informations transmises au serveur de veille devrait disparaitre au profit de la remontée des RPU. Le présent travail essaie de répondre à cette question.
+
+\section{Comparaison des données}
+
+<<sau_rpu,echo=FALSE,results='asis',fig.width=8>>=
+
+# si un nombre est sup à 10^6 alors la notation scientifiques est utilisée
+# voir ?option puis scipen pour explication (et http://yihui.name/knitr/demo/output/).
+options(scipen = 6, digits = 2)
+
+# met un espace comme séparateur de milliers. A mettre en début de document. Source: http://stackoverflow.com/questions/18965637/set-global-thousand-separator-on-knitr
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=" ")
+})
+
+a<-c("3FR","ALK","COL","DIA","GUE","HUS","MUL","ODI","SAV","SEL","TAN","WIS","HAG","ANN")
+sau<-c(16423, 14352, 64650, 7078, 15531, 121190, 62806, 25675, 26915, 18076, 14704, 11205, 0, 14661)
+rpu<-c(15688, 7126, 64758, 29469, 15103, 37018, 56195, 25963, 12424, 19790, 0, 12646, 34414, 0)
+
+s_sau <- sum(sau)
+s_rpu <- sum(rpu)
+p <- round(s_rpu*100/s_sau,2)
+
+b<-rbind(sau,rpu)
+colnames(b)<-a
+rownames(b) <- c("SAU","RPU")
+
+# comme la table est trop large pour tenir sur une largeur de page, on la scinde en deux (pas trouvé d'autre solution)
+b1 <- b[,c(1:7)]
+b2 <- b[,c(8:14)]
+
+xtable(b1, digits=0)
+xtable(b2, caption=c("Comparaison RPU renseignés et Passages (SAU) déclarés en 2013","Comparaisons RPU-Passages"), label="fig:rpu_p", digits=0)
+
+c<-c("lightblue","blue")
+barplot(b,beside=T,col=c,las=2,main="Données des SU versus RPU transmis",sub="(au 31/12/2013)")
+legend(x="topright",legend=c("SAU","RPU"),border=T,pch=15,col=c,bty="n")
+@
+
+\textbf{Remarques:}
+\begin{itemize}
+  \item \emph{RPU} sont les RPU transmis à e-santé. A terme ce devrait être la seule donnée d'activité recueillie. On remarque pour 2013 qu'on est loin de l'exhaustivité.
+  \item \emph{SAU} données d'activité transmise au serveur régional de veille. Ces données sont recueillies depuis 2005 sauf pour trois établissements. Deux d'entre eux (StAnne et Diaconnat fonderie) n'existaient pas en tant que SU au moment de l'implantation du serveur.
+  \item Le\emph{CH Haguenau} ne transmet plus au serveur régional depuis plusieurs années.
+  \item le \emph{SU Saverne} ne transmets des RPU que depuis fin juillet 2013
+  \item le \emph{CH Thann} n'a jamais transmis de RPU
+  \item la \emph{Clinique Ste Anne} ne transmet pas de RPU mais transmet des données d'activité quotidienne sur le modèle du serveur régional.
+  \item le \emph{CH Sélestat} n'a pas transmis de RPU pendant 3 mois (août à novembre 2013)
+  \item le \emph{CH d'Alkirch} n'a pas transmis de RPU pendant les premières semaines de 2013.
+\end{itemize}
+
+
+\begin{center}
+\begin{boxedminipage}{10cm}
+ \begin{itemize}
+  \item nombre total de passages déclarés: $\textbf{\Sexpr{s_sau}}$ 
+  \item nombre total de RPU déclarés: \textbf{\Sexpr{s_rpu}}
+ \end{itemize}
+\end{boxedminipage}
+\end{center}
+
+Si on suppose que le nombre de passages déclarés est exact (en réalité sous estimé, par ex. Haguenau), l'exhaustivité mesurée est de l'ordre de \textbf{\Sexpr{p}\%} .
+
+\section{Conclusion}
+
+La comparaison des deux sources de données montre que l'exhaustivité quantitative des RPU est nettement inférieure à celle du serveur régional. Cette situation justifie le maintien du serveur de veille tant que la remontée des RPU n'a pas atteint un niveau équivalent.
+
+\end{document}
+
